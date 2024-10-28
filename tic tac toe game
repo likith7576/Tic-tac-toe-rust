@@ -1,0 +1,63 @@
+fn main() {
+    let mut board = vec![' '; 9];
+    let mut current_player = 'X';
+
+    loop {
+        print_board(&board);
+        println!("Player {}'s turn", current_player);
+        let pos = get_move();
+        if board[pos] == ' ' {
+            board[pos] = current_player;
+            if check_win(&board, current_player) {
+                print_board(&board);
+                println!("Player {} wins!", current_player);
+                break;
+            } else if check_draw(&board) {
+                print_board(&board);
+                println!("It's a draw!");
+                break;
+            }
+            current_player = if current_player == 'X' { 'O' } else { 'X' };
+        } else {
+            println!("Position already taken, try again.");
+        }
+    }
+}
+
+fn print_board(board: &[char]) {
+    println!();
+    for i in 0..3 {
+        println!(" {} | {} | {} ", board[i * 3], board[i * 3 + 1], board[i * 3 + 2]);
+        if i < 2 {
+            println!("---|---|---");
+        }
+    }
+    println!();
+}
+
+fn get_move() -> usize {
+    loop {
+        let mut input = String::new();
+        println!("Enter your move (1-9): ");
+        std::io::stdin().read_line(&mut input).expect("Failed to read line");
+        match input.trim().parse::<usize>() {
+            Ok(num) if num >= 1 && num <= 9 => return num - 1,
+            _ => println!("Invalid input, please enter a number between 1 and 9."),
+        }
+    }
+}
+
+fn check_win(board: &[char], player: char) -> bool {
+    let win_conditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
+    ];
+    win_conditions.iter().any(|&cond| {
+        cond.iter().all(|&pos| board[pos] == player)
+    })
+}
+
+fn check_draw(board: &[char]) -> bool {
+    board.iter().all(|&pos| pos != ' ')
+}
